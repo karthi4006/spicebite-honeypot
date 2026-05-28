@@ -76,6 +76,9 @@ http://localhost:5000
 * Modern animations and transitions
 
 ---
+## Admin Dashboard
+<img width="2499" height="1191" alt="image" src="https://github.com/user-attachments/assets/2a4e6d16-f565-4902-9bfb-61a3cda6c0f6" />
+
 
 ## ⚠️ Disclaimer
 
