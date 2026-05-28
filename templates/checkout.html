@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Checkout &mdash; SpiceBite{% endblock %}
+{% block content %}
+<section class="page-hero">
+  <div class="container-xl">
+    <h1 class="page-title">Secure <em>Checkout</em> <i class="fa fa-lock" style="font-size:60%;opacity:.7"></i></h1>
+  </div>
+</section>
+<section class="checkout-section">
+  <div class="container-xl">
+    <div class="checkout-steps">
+      <div class="step step-done"><span class="step-num">&#x2713;</span><span class="step-label">Cart</span></div>
+      <div class="step-line"></div>
+      <div class="step step-active"><span class="step-num">2</span><span class="step-label">Payment</span></div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-num">3</span><span class="step-label">Confirm</span></div>
+    </div>
+    <div class="checkout-layout">
+      <div class="checkout-form-wrap">
+        <form method="POST" action="{{ url_for('checkout') }}" id="checkoutForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-section">
+            <h3><i class="fa fa-map-marker-alt"></i> Delivery Details</h3>
+            <div class="row g-3">
+              <div class="col-md-6"><label>First Name</label><input type="text" class="form-ctrl" name="first_name" placeholder="John" required></div>
+              <div class="col-md-6"><label>Last Name</label><input type="text" class="form-ctrl" name="last_name" placeholder="Doe" required></div>
+              <div class="col-12"><label>Address</label><input type="text" class="form-ctrl" name="address" placeholder="123 Flavour Street" required></div>
+              <div class="col-md-6"><label>City</label><input type="text" class="form-ctrl" name="city" placeholder="Spice City"></div>
+              <div class="col-md-6"><label>Phone</label><input type="tel" class="form-ctrl" name="phone" placeholder="+1 555-0100"></div>
+            </div>
+          </div>
+          <div class="form-section">
+            <h3><i class="fa fa-credit-card"></i> Payment</h3>
+            <div class="card-type-row">
+              <span class="card-type-badge">VISA</span><span class="card-type-badge">MC</span>
+              <span class="card-type-badge">AMEX</span><span class="card-type-badge">PayPal</span>
+            </div>
+            <div class="row g-3">
+              <div class="col-12"><label>Card Number</label>
+                <div class="input-icon-wrap">
+                  <i class="fa fa-credit-card input-icon"></i>
+                  <input type="text" class="form-ctrl form-ctrl-icon" name="card_number" id="cNum" placeholder="4242 4242 4242 4242" maxlength="19" required>
+                </div>
+              </div>
+              <div class="col-md-6"><label>Expiry</label><input type="text" class="form-ctrl" name="expiry" id="expiry" placeholder="MM/YY" maxlength="5" required></div>
+              <div class="col-md-6"><label>CVV</label><input type="text" class="form-ctrl" name="cvv" id="cvv" placeholder="&bull;&bull;&bull;" maxlength="4" required></div>
+              <div class="col-12"><label>Cardholder Name</label><input type="text" class="form-ctrl" name="card_name" placeholder="John Doe" required></div>
+            </div>
+          </div>
+          <div class="form-section qr-section">
+            <h3><i class="fa fa-qrcode"></i> Pay via QR</h3>
+            <div class="qr-wrap">
+              <div class="qr-placeholder">
+                <div class="qr-grid">
+                  {% set pat=[1,1,1,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,0,1,0,0,1,0,1,0,1,1,0,1,0,1,0,1,1,1,0,0,0,0,1,1,0,0,1,1,0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,1,0,1,1,0,1] %}
+                  {% for b in pat %}<div class="qr-cell {{ 'on' if b else '' }}"></div>{% endfor %}
+                </div>
+              </div>
+              <div class="qr-info"><p>Scan with UPI / PayPal / Apple Pay</p></div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-accent btn-lg w-100 mt-2" id="payBtn">
+            <i class="fa fa-lock"></i> Pay Now &amp; Place Order
+          </button>
+          <p class="checkout-secure-note"><i class="fa fa-shield-alt"></i> Your payment is encrypted with 256-bit SSL</p>
+        </form>
+      </div>
+      <div class="checkout-summary-col">
+        <div class="summary-box">
+          <h3>Your Order</h3>
+          <p class="text-muted" style="font-size:.85rem;text-align:center;padding:.75rem 0"><i class="fa fa-shopping-bag"></i> Items from your cart</p>
+          <div class="security-badges">
+            <div class="badge-item"><i class="fa fa-shield-alt"></i> SSL Secured</div>
+            <div class="badge-item"><i class="fa fa-lock"></i> PCI Compliant</div>
+            <div class="badge-item"><i class="fa fa-undo"></i> Easy Refunds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('cNum').addEventListener('input',function(e){var v=e.target.value.replace(/\D/g,'').substring(0,16);e.target.value=v.replace(/(.{4})/g,'$1 ').trim();});
+document.getElementById('expiry').addEventListener('input',function(e){var v=e.target.value.replace(/\D/g,'');if(v.length>=2)v=v.substring(0,2)+'/'+v.substring(2,4);e.target.value=v;});
+document.getElementById('cvv').addEventListener('input',function(e){e.target.value=e.target.value.replace(/\D/g,'');});
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Create Account &mdash; SpiceBite{% endblock %}
+{% block content %}
+<section class="auth-section">
+  <div class="auth-card">
+    <span class="auth-brand">&#x1F525; SpiceBite</span>
+    <h2>Create Account</h2>
+    <p class="auth-sub">Join SpiceBite and start ordering your favourites</p>
+    {% if error %}
+    <div class="alert-box alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error }}</div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('signup') }}" id="signupForm" novalidate>
+      <div class="field-group">
+        <label for="su_user">Username</label>
+        <div class="input-icon-wrap">
+          <i class="fa fa-user input-icon"></i>
+          <input type="text" id="su_user" name="username" class="form-ctrl form-ctrl-icon"
+            placeholder="yourname" autocomplete="username" required minlength="3">
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="su_email">Email</label>
+        <div class="input-icon-wrap">
+          <i class="fa fa-envelope input-icon"></i>
+          <input type="email" id="su_email" name="email" class="form-ctrl form-ctrl-icon"
+            placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="su_pw">Password</label>
+        <div class="input-icon-wrap">
+          <i class="fa fa-lock input-icon"></i>
+          <input type="password" id="su_pw" name="password" class="form-ctrl form-ctrl-icon"
+            placeholder="Min. 6 characters" required minlength="6">
+          <button type="button" class="toggle-pw" onclick="togglePw('su_pw',this)"><i class="fa fa-eye"></i></button>
+        </div>
+        <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwFill"></div></div>
+        <span class="pw-strength-label" id="pwLabel"></span>
+      </div>
+      <div class="field-group">
+        <label for="su_conf">Confirm Password</label>
+        <div class="input-icon-wrap">
+          <i class="fa fa-lock input-icon"></i>
+          <input type="password" id="su_conf" name="confirm_password" class="form-ctrl form-ctrl-icon"
+            placeholder="Repeat password" required>
+        </div>
+        <span class="field-hint" id="hintConf"></span>
+      </div>
+      <button type="submit" class="btn btn-accent w-100 mt-3">
+        <i class="fa fa-user-plus"></i> Create My Account
+      </button>
+    </form>
+    <div class="auth-divider"><span>or</span></div>
+    <div class="auth-links">Already have an account? <a href="{{ url_for('login') }}">Sign In</a></div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePw(id,btn){var i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.innerHTML='<i class="fa fa-eye-slash"></i>';}else{i.type='password';btn.innerHTML='<i class="fa fa-eye"></i>';}}
+var pw=document.getElementById('su_pw'),conf=document.getElementById('su_conf'),fill=document.getElementById('pwFill'),lbl=document.getElementById('pwLabel'),hc=document.getElementById('hintConf');
+pw.addEventListener('input',function(){var v=this.value,s=0;if(v.length>=6)s++;if(v.length>=10)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;var cols=['','#e74c3c','#e67e22','#f39c12','#2ecc71','#27ae60'],labs=['','Very Weak','Weak','Fair','Strong','Very Strong'];fill.style.width=(s*20)+'%';fill.style.background=cols[s]||'#e74c3c';lbl.textContent=labs[s]||'';lbl.style.color=cols[s]||'';});
+conf.addEventListener('input',function(){if(this.value!==pw.value){hc.textContent='Passwords do not match';hc.style.color='#e74c3c';}else{hc.textContent='\u2713 Match';hc.style.color='#2ecc71';}});
+document.getElementById('signupForm').addEventListener('submit',function(e){if(pw.value!==conf.value){e.preventDefault();hc.textContent='Passwords do not match';hc.style.color='#e74c3c';}});
+</script>
+{% endblock %}

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Attack Dashboard — SpiceBite Honeypot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #07080a;
+      --surface: #0e1117;
+      --surface2: #131820;
+      --border: #1e2530;
+      --accent: #e63946;
+      --green: #2ecc71;
+      --yellow: #f39c12;
+      --blue: #3498db;
+      --purple: #9b59b6;
+      --text: #d0d6e0;
+      --text-muted: #5a6478;
+      --mono: 'Space Mono', monospace;
+    }
+    * { box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; margin:0; min-height:100vh; }
+
+    /* Sidebar */
+    .sidebar { position:fixed; left:0; top:0; bottom:0; width:220px; background:var(--surface);
+               border-right:1px solid var(--border); padding:1.5rem 1rem; z-index:100;
+               display:flex; flex-direction:column; }
+    .sb-brand { font-family:var(--mono); color:var(--accent); font-size:1rem; margin-bottom:2rem; padding:0 .5rem; }
+    .sb-brand small { display:block; color:var(--text-muted); font-size:.65rem; margin-top:.2rem; }
+    .sb-nav a { display:flex; align-items:center; gap:.75rem; color:var(--text-muted);
+                padding:.6rem .75rem; border-radius:8px; text-decoration:none; font-size:.85rem;
+                margin-bottom:.2rem; transition:all .2s; }
+    .sb-nav a:hover, .sb-nav a.active { background:var(--surface2); color:var(--text); }
+    .sb-nav a i { width:16px; text-align:center; }
+    .sb-footer { margin-top:auto; }
+    .sb-footer a { color:var(--text-muted); font-size:.8rem; text-decoration:none; }
+
+    /* Main */
+
+    .main { margin-left:220px; padding:2rem; }
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
+    .top-bar h1 { font-size:1.4rem; font-weight:700; }
+    .top-bar .badge-live { background:#1a2a1a; color:var(--green);
+                            border:1px solid #2ecc7133; padding:.35rem .8rem;
+                            border-radius:20px; font-size:.75rem; font-family:var(--mono);
+                            display:flex; align-items:center; gap:.4rem; }
+    .dot { width:8px; height:8px; background:var(--green); border-radius:50%; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* Stat Cards */
+    .stat-cards { display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.25rem; }
+    .stat-card .sc-label { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+    .stat-card .sc-val { font-size:2rem; font-weight:700; font-family:var(--mono); margin:.3rem 0; }
+    .stat-card .sc-sub { font-size:.75rem; color:var(--text-muted); }
+    .sc-accent { color:var(--accent); }
+    .sc-green  { color:var(--green); }
+    .sc-yellow { color:var(--yellow); }
+    .sc-blue   { color:var(--blue); }
+
+    /* Charts */
+    .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem; }
+    .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.5rem; }
+    .chart-card h3 { font-size:.9rem; color:var(--text-muted); margin-bottom:1rem; text-transform:uppercase; letter-spacing:.05em; }
+    canvas { max-height:250px; }
+
+    /* Tables */
+    .table-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:1.5rem; }
+    .table-header { padding:1rem 1.5rem; border-bottom:1px solid var(--border);
+                    display:flex; justify-content:space-between; align-items:center; }
+    .table-header h3 { font-size:.95rem; margin:0; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    thead tr { background:var(--surface2); }
+    th { padding:.75rem 1rem; text-align:left; color:var(--text-muted); font-weight:500;
+         font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid var(--border); }
+    td { padding:.7rem 1rem; border-bottom:1px solid #0d0d0d; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover { background:#0c0f14; }
+    .mono { font-family:var(--mono); font-size:.75rem; }
+    .payload-cell { max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* Attack type badges */
+    .badge-attack { padding:.2rem .6rem; border-radius:20px; font-size:.7rem; font-family:var(--mono); }
+    .badge-sqli { background:#2a1010; color:#e74c3c; border:1px solid #5c1a1a; }
+    .badge-xss  { background:#1a1a2a; color:#9b59b6; border:1px solid #3d2a5c; }
+    .badge-upload { background:#1a2a1a; color:#2ecc71; border:1px solid #1a5c2a; }
+    .badge-brute { background:#2a2210; color:#f39c12; border:1px solid #5c4a1a; }
+    .badge-debug { background:#10202a; color:#3498db; border:1px solid #1a3a5c; }
+    .badge-devtools { background:#202020; color:#95a5a6; border:1px solid #404040; }
+    .badge-404 { background:#151515; color:#555; border:1px solid #333; }
+    .badge-other { background:#1a1a1a; color:#aaa; border:1px solid #333; }
+
+    /* Filters */
+    .filters { display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; }
+    .filter-input { background:#0d0d0d; border:1px solid var(--border); color:var(--text);
+                    padding:.4rem .75rem; border-radius:8px; font-size:.8rem; outline:none; }
+    .filter-input:focus { border-color:var(--accent); }
+
+    /* Tabs */
+    .tab-nav { display:flex; gap:.5rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border); }
+    .tab-btn { background:none; border:none; color:var(--text-muted); padding:.6rem 1rem;
+               cursor:pointer; font-size:.85rem; border-bottom:2px solid transparent;
+               transition:all .2s; font-family:'DM Sans',sans-serif; }
+    .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+
+    .empty-table { text-align:center; padding:3rem; color:var(--text-muted); }
+    .scroll-x { overflow-x:auto; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    ⚡ HONEYPOT<br>
+    <small>SpiceBite · Security Panel</small>
+  </div>
+  <nav class="sb-nav">
+    <a href="#dashboard" class="active" onclick="showTab('dashboard',this)"><i class="fa fa-chart-pie"></i> Dashboard</a>
+    <a href="#attacks" onclick="showTab('attacks',this)"><i class="fa fa-bug"></i> Attack Logs</a>
+    <a href="#logins" onclick="showTab('logins',this)"><i class="fa fa-user-secret"></i> Login Attempts</a>
+    <a href="#uploads" onclick="showTab('uploads',this)"><i class="fa fa-file-upload"></i> File Uploads</a>
+    <a href="#admin-log" onclick="showTab('admin-log',this)"><i class="fa fa-shield"></i> Admin Probes</a>
+  </nav>
+  <div class="sb-footer">
+    <a href="{{ url_for('index') }}"><i class="fa fa-external-link-alt"></i> View Site</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="top-bar">
+  <h1>🔥 Attack Intelligence Dashboard</h1>
+
+  <div style="display:flex; gap:12px; align-items:center;">
+
+    <div class="badge-live">
+      <div class="dot"></div> Live — Auto-refresh 10s
+    </div>
+
+    <a href="{{ url_for('admin_logout') }}" 
+       class="btn btn-sm btn-danger">
+       <i class="fa fa-sign-out-alt"></i> Logout
+    </a>
+
+  </div>
+</div>
+
+  <!-- Tabs -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('dashboard',this)">Overview</button>
+    <button class="tab-btn" onclick="showTab('attacks',this)">Attack Logs</button>
+    <button class="tab-btn" onclick="showTab('logins',this)">Login Attempts</button>
+    <button class="tab-btn" onclick="showTab('uploads',this)">File Uploads</button>
+    <button class="tab-btn" onclick="showTab('admin-log',this)">Admin Probes</button>
+  </div>
+
+  <!-- Dashboard Tab -->
+  <div id="dashboard" class="tab-pane active">
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="sc-label">Total Attacks</div>
+        <div class="sc-val sc-accent">{{ total_attacks }}</div>
+        <div class="sc-sub">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Failed Logins</div>
+        <div class="sc-val sc-yellow">{{ failed_logins }}</div>
+        <div class="sc-sub">SQLi attempts included</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Suspicious Uploads</div>
+        <div class="sc-val sc-green">{{ suspicious_uploads }}</div>
+        <div class="sc-sub">Malicious files</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Admin Probes</div>
+        <div class="sc-val sc-blue">{{ admin_log|length }}</div>
+        <div class="sc-sub">Brute force attempts</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>Attack Distribution</h3>
+        <canvas id="pieChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Attack Frequency (by hour)</h3>
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Attacks -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Recent Attacks</h3>
+        <span class="mono" style="color:var(--text-muted);font-size:.75rem">Last 20 events</span>
+      </div>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Time</th><th>IP</th><th>Type</th><th>Endpoint</th><th>Payload</th></tr>
+          </thead>
+          <tbody>
+            {% for row in attacks[:20] %}
+            <tr>
+              <td class="mono" style="color:var(--text-muted)">{{ row.id }}</td>
+              <td class="mono" style="color:var(--text-muted)">{{ row.timestamp[:16] }}</td>
+              <td class="mono">{{ row.ip }}</td>
+              <td>{{ badge(row.attack_type) }}</td>
+              <td class="mono" style="color:var(--blue)">{{ row.endpoint }}</td>
+              <td class="payload-cell mono" title="{{ row.payload }}">{{ row.payload[:60] }}</td>
+            </tr>
+            {% endfor %}
+            {% if not attacks %}
+            <tr><td colspan="6" class="empty-table">No attacks logged yet. The honeypot is waiting... 🕵️</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attacks Tab -->
+  <div id="attacks" class="tab-pane">
+    <div class="table-card">
+      <div class="table-header">
+        <h3>All Attack Logs</h3>
+        <div class="filters">
+          <input class="filter-input" id="filterType" placeholder="Filter by type..." oninput="filterTable('atkTable','filterType',3)">
+          <input class="filter-input" id="filterDate" type="date" oninput="filterTable('atkTable','filterDate',1)">
+        </div>
+      </div>
+      <div class="scroll-x">
+        <table id="atkTable">
+          <thead>
+            <tr><th>#</th><th>Timestamp</th><th>IP</th><th>Type</th><th>Endpoint</th><th>Payload</th><th>User Agent</th></tr>
+          </thead>
+          <tbody>
+            {% for row in attacks %}
+            <tr>
+              <td class="mono" style="color:var(--text-muted)">{{ row.id }}</td>
+              <td class="mono">{{ row.timestamp[:16] }}</td>
+              <td class="mono">{{ row.ip }}</td>
+              <td>{{ badge(row.attack_type) }}</td>
+              <td class="mono" style="color:var(--blue)">{{ row.endpoint }}</td>
+              <td class="payload-cell mono" title="{{ row.payload }}">{{ row.payload[:80] }}</td>
+              <td style="color:var(--text-muted);font-size:.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ row.user_agent }}">{{ row.user_agent[:40] }}</td>
+            </tr>
+            {% endfor %}
+            {% if not attacks %}
+            <tr><td colspan="7" class="empty-table">No attacks yet.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logins Tab -->
+  <div id="logins" class="tab-pane">
+    <div class="table-card">
+      <div class="table-header"><h3>Login Attempts (SQLi Trap)</h3></div>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Time</th><th>IP</th><th>Username</th><th>Password</th><th>Success</th></tr>
+          </thead>
+          <tbody>
+            {% for row in logins %}
+            <tr>
+              <td class="mono" style="color:var(--text-muted)">{{ row.id }}</td>
+              <td class="mono">{{ row.timestamp[:16] }}</td>
+              <td class="mono">{{ row.ip }}</td>
+              <td class="mono" style="color:var(--yellow)">{{ row.username }}</td>
+              <td class="mono payload-cell" title="{{ row.password }}">{{ row.password[:40] }}</td>
+              <td>
+                {% if row.success %}
+                <span style="color:var(--green)">✓ Yes</span>
+                {% else %}
+                <span style="color:var(--accent)">✗ No</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            {% if not logins %}
+            <tr><td colspan="6" class="empty-table">No login attempts yet.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Uploads Tab -->
+  <div id="uploads" class="tab-pane">
+    <div class="table-card">
+      <div class="table-header"><h3>File Upload Logs</h3></div>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Time</th><th>IP</th><th>Filename</th><th>Extension</th><th>Suspicious</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            {% for row in uploads %}
+            <tr>
+              <td class="mono" style="color:var(--text-muted)">{{ row.id }}</td>
+              <td class="mono">{{ row.timestamp[:16] }}</td>
+              <td class="mono">{{ row.ip }}</td>
+              <td class="mono" style="color:var(--blue)">{{ row.filename }}</td>
+              <td class="mono">{{ row.extension }}</td>
+              <td>
+                {% if row.suspicious %}
+                <span style="color:var(--accent)">⚠ Yes</span>
+                {% else %}
+                <span style="color:var(--green)">✓ Clean</span>
+                {% endif %}
+              </td>
+              <td style="color:var(--text-muted);font-size:.8rem">{{ row.notes or '—' }}</td>
+            </tr>
+            {% endfor %}
+            {% if not uploads %}
+            <tr><td colspan="7" class="empty-table">No uploads yet.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Log Tab -->
+  <div id="admin-log" class="tab-pane">
+    <div class="table-card">
+      <div class="table-header"><h3>Admin Panel Probe Log</h3></div>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Time</th><th>IP</th><th>Username Tried</th><th>Attempt #</th><th>User Agent</th></tr>
+          </thead>
+          <tbody>
+            {% for row in admin_log %}
+            <tr>
+              <td class="mono" style="color:var(--text-muted)">{{ row.id }}</td>
+              <td class="mono">{{ row.timestamp[:16] }}</td>
+              <td class="mono">{{ row.ip }}</td>
+              <td class="mono" style="color:var(--yellow)">{{ row.username }}</td>
+              <td class="mono">
+                {% if row.attempt_number > 3 %}
+                <span style="color:var(--accent)">{{ row.attempt_number }} 🚨</span>
+                {% else %}
+                {{ row.attempt_number }}
+                {% endif %}
+              </td>
+              <td style="color:var(--text-muted);font-size:.72rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.user_agent[:60] }}</td>
+            </tr>
+            {% endfor %}
+            {% if not admin_log %}
+            <tr><td colspan="6" class="empty-table">No admin probes yet.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── Tab System ──────────────────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn, .sb-nav a').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ── Charts ──────────────────────────────────────────────────────────────────
+const typeCounts = {{ type_counts|safe }};
+const hourly     = {{ hourly|safe }};
+
+const COLORS = ['#e63946','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e74c3c'];
+
+// Pie Chart
+new Chart(document.getElementById('pieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: Object.keys(typeCounts),
+    datasets: [{
+      data: Object.values(typeCounts),
+      backgroundColor: COLORS,
+      borderColor: '#0e1117',
+      borderWidth: 3,
+    }]
+  },
+  options: {
+    plugins: { legend: { labels: { color:'#8899aa', font:{size:11} } } },
+    cutout: '60%',
+  }
+});
+
+// Bar Chart
+const sortedHours = Object.keys(hourly).sort();
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: sortedHours.map(h => h.split('T')[1] || h),
+    datasets: [{
+      label: 'Attacks',
+      data: sortedHours.map(h => hourly[h]),
+      backgroundColor: '#e6394688',
+      borderColor: '#e63946',
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks:{color:'#5a6478'}, grid:{color:'#1e2530'} },
+      y: { ticks:{color:'#5a6478'}, grid:{color:'#1e2530'} }
+    }
+  }
+});
+
+// ── Table Filter ─────────────────────────────────────────────────────────────
+function filterTable(tableId, inputId, colIdx) {
+  const val = document.getElementById(inputId).value.toLowerCase();
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  rows.forEach(row => {
+    const cell = row.cells[colIdx];
+    const text = cell ? cell.textContent.toLowerCase() : '';
+    row.style.display = text.includes(val) ? '' : 'none';
+  });
+}
+
+// ── Auto Refresh ──────────────────────────────────────────────────────────────
+setInterval(() => { location.reload(); }, 100000);
+</script>
+</body>
+</html>

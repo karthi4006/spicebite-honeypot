@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Order Confirmed &mdash; SpiceBite{% endblock %}
+{% block content %}
+<section class="bill-section">
+  <div class="container">
+    <div class="bill-card">
+      <div class="bill-header">
+        <div class="bill-check-anim"><div class="bill-check">&#x2713;</div></div>
+        <h1>Order Confirmed!</h1>
+        <p>Hey {{ username }}, your food is being prepared with love &#x1F373;</p>
+      </div>
+      <div class="delivery-estimate">
+        <div class="estimate-icon">&#x1F6F5;</div>
+        <div class="estimate-text"><strong>Estimated Delivery</strong><span>25&ndash;35 minutes</span></div>
+        <div class="estimate-timer" id="cTimer">30:00</div>
+      </div>
+      <div class="bill-meta">
+        <div class="meta-item"><span class="meta-label">Transaction ID</span><span class="meta-val mono">{{ txn_id }}</span></div>
+        <div class="meta-item"><span class="meta-label">Placed at</span><span class="meta-val">{{ timestamp }}</span></div>
+        <div class="meta-item"><span class="meta-label">Payment</span><span class="meta-val">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ card_last4 }}</span></div>
+      </div>
+      <div class="bill-items">
+        <h3>Items Ordered</h3>
+        <table class="bill-table">
+          <thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Subtotal</th></tr></thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td>{{ item.emoji if item.emoji else '' }} {{ item.name }}</td>
+              <td style="text-align:center">{{ item.qty }}</td>
+              <td style="text-align:right">${{ "%.2f"|format(item.price) }}</td>
+              <td style="text-align:right">${{ "%.2f"|format(item.subtotal) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr><td colspan="3" style="text-align:right;color:var(--text-muted);font-size:.85rem">Subtotal</td><td style="text-align:right">${{ "%.2f"|format(total) }}</td></tr>
+            <tr><td colspan="3" style="text-align:right;color:var(--text-muted);font-size:.85rem">Tax (8%)</td><td style="text-align:right">${{ "%.2f"|format(total * 0.08) }}</td></tr>
+            <tr class="total-row"><td colspan="3"><strong>Total Charged</strong></td><td><strong>${{ "%.2f"|format(total * 1.08) }}</strong></td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="bill-footer">
+        <p class="bill-thank">Thank you for choosing SpiceBite! &#x1F525;</p>
+        <div class="bill-actions">
+          <a href="{{ url_for('index') }}" class="btn btn-accent"><i class="fa fa-utensils"></i> Order Again</a>
+          <button onclick="window.print()" class="btn btn-ghost"><i class="fa fa-print"></i> Print Receipt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){var s=30*60,el=document.getElementById('cTimer');if(!el)return;var t=setInterval(function(){s--;if(s<=0){el.textContent='Arriving soon!';clearInterval(t);return;}var m=Math.floor(s/60),sec=s%60;el.textContent=(m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;},1000);})();
+</script>
+{% endblock %}

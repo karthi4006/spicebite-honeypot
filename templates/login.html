@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Sign In &mdash; SpiceBite{% endblock %}
+{% block content %}
+<section class="auth-section">
+  <div class="auth-card">
+    <span class="auth-brand">&#x1F525; SpiceBite</span>
+    <h2>Welcome Back</h2>
+    <p class="auth-sub">Sign in to order, save favourites, and track deliveries</p>
+    {% if error %}
+    <div class="alert-box alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error }}</div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+      <div class="field-group">
+        <label for="lu">Username</label>
+        <div class="input-icon-wrap">
+          <i class="fa fa-user input-icon"></i>
+          <input type="text" id="lu" name="username" class="form-ctrl form-ctrl-icon"
+            placeholder="Enter your username" autocomplete="username" required>
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="lp">Password</label>
+        <div class="input-icon-wrap">
+          <i class="fa fa-lock input-icon"></i>
+          <input type="password" id="lp" name="password" class="form-ctrl form-ctrl-icon"
+            placeholder="Enter your password" autocomplete="current-password" required>
+          <button type="button" class="toggle-pw" onclick="togglePw('lp',this)"><i class="fa fa-eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-accent w-100 mt-3">
+        <i class="fa fa-sign-in-alt"></i> Sign In
+      </button>
+    </form>
+    <div class="auth-demo-hint">
+      <i class="fa fa-info-circle"></i>
+      Demo: <code>john</code> / <code>password123</code>
+    </div>
+    <div class="auth-divider"><span>or</span></div>
+    <div class="auth-links">New here? <a href="{{ url_for('signup') }}">Create a free account</a></div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePw(id,btn){var i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.innerHTML='<i class="fa fa-eye-slash"></i>';}else{i.type='password';btn.innerHTML='<i class="fa fa-eye"></i>';}}
+</script>
+{% endblock %}

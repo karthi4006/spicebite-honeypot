@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{% block title %}SpiceBite — Crave. Order. Devour.{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+<div class="grain-overlay"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg sticky-top" id="mainNav">
+  <div class="container-xl">
+    <a class="navbar-brand" href="{{ url_for('index') }}">
+      <span class="brand-icon">🔥</span>
+      <span class="brand-text">Spice<em>Bite</em></span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto gap-1">
+        {% set cat_icons = {'desserts':'🍰','spicy':'🌶️','noodles':'🍜','pizza':'🍕','beverages':'🧋','fastfood':'🍔'} %}
+        {% for cat in categories %}
+        <li class="nav-item">
+          <a class="nav-link nav-cat" href="{{ url_for('category', cat=cat) }}">
+            {{ cat_icons.get(cat,'🍽️') }} {{ cat.title() }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="nav-actions d-flex align-items-center gap-3">
+        <a href="{{ url_for('search') }}" class="nav-icon-btn" title="Search"><i class="fa fa-search"></i></a>
+        {% if current_user %}
+        <a href="{{ url_for('wishlist') }}" class="nav-icon-btn" title="Wishlist">
+          <i class="fa fa-heart"></i>
+          {% if wish_count %}<span class="badge-pill">{{ wish_count }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('cart') }}" class="nav-icon-btn" title="Cart">
+          <i class="fa fa-shopping-bag"></i>
+          {% if cart_count %}<span class="badge-pill">{{ cart_count }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('profile') }}" class="user-chip">
+  	  <span class="user-avatar">{{ current_user[0].upper() }}</span>
+  	  <span class="user-name">{{ current_user }}</span>
+	</a>
+
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-accent btn-sm">Sign Out</a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Sign In</a>
+        <a href="{{ url_for('signup') }}" class="btn btn-accent btn-sm">Join Free</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+  {% for cat, msg in messages %}
+  <div class="flash-toast flash-{{ cat }}">
+    <span>{{ msg }}</span>
+    <button onclick="this.parentElement.remove()">✕</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer class="site-footer">
+  <div class="container-xl">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">🔥 SpiceBite</div>
+        <p class="footer-tagline">Crave. Order. Devour.</p>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('reviews') }}">Reviews</a>
+        <a href="{{ url_for('search') }}">Search</a>
+        {% if current_user %}
+        <a href="{{ url_for('cart') }}">Cart</a>
+        <a href="{{ url_for('wishlist') }}">Wishlist</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Sign In</a>
+        <a href="{{ url_for('signup') }}">Sign Up</a>
+        {% endif %}
+        <a href="/admin-login" style="opacity:.25;font-size:.7rem">Staff</a>
+      </div>
+      <div class="footer-copy">&copy; 2024 SpiceBite Inc. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

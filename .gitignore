@@ -1,0 +1,9 @@
+logs/
+uploads/
+Python 3.14/
+database
+*.db
+__pycache__/
+*.pyc
+.env
+templates.zip

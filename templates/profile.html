@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>👤 Profile</h2>
+
+<div class="card p-3">
+
+<p><b>Username:</b> {{ user.username }}</p>
+<p><b>Email:</b> {{ user.email }}</p>
+<p><b>Phone:</b> {{ user.phone or "Not provided" }}</p>
+
+<hr>
+
+<h4>🔒 Sensitive Information</h4>
+
+{% if not unlocked %}
+
+<p>Card Number: **** **** **** ****</p>
+<p>Address: ********</p>
+
+<form method="POST" action="{{ url_for('unlock_sensitive') }}">
+<input type="password" name="password" placeholder="Enter password to unlock" required>
+<button type="submit">Unlock</button>
+</form>
+
+{% else %}
+
+<p><b>Card Number:</b> {{ user.card_number }}</p>
+<p><b>Address:</b> {{ user.address }}</p>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

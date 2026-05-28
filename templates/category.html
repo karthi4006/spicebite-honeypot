@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{{ cat }} — SpiceBite{% endblock %}
+{% block content %}
+
+<section class="cat-hero">
+  <div class="container-xl">
+    <div class="breadcrumb-row">
+      <a href="{{ url_for('index') }}">Home</a> <span>/</span> <span>{{ cat }}</span>
+    </div>
+    <h1 class="cat-hero-title">{{ cat }}</h1>
+    <p class="cat-hero-sub">{{ items|length }} delicious options awaiting you</p>
+  </div>
+</section>
+
+<section class="menu-section">
+  <div class="container-xl">
+    <div class="items-grid items-grid-large">
+      {% for item in items %}
+      <div class="item-card" style="animation-delay:{{ loop.index0 * 0.05 }}s">
+        <div class="item-emoji-wrap">
+  {% if item.emoji.endswith(('.png', '.jpg', '.jpeg')) %}
+    <img src="{{ url_for('static', filename=item.emoji) }}" class="item-img">
+  {% else %}
+    <div class="item-emoji">{{ item.emoji }}</div>
+  {% endif %}
+</div>
+
+
+        <div class="item-body">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <p class="item-desc">{{ item.desc }}</p>
+          <div class="item-footer">
+            <span class="item-price">${{ "%.2f"|format(item.price) }}</span>
+            <div class="item-actions">
+              <form method="POST" action="{{ url_for('cart_add') }}">
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <input type="hidden" name="name" value="{{ item.name }}">
+                <input type="hidden" name="price" value="{{ item.price }}">
+                <button type="submit" class="btn-add-cart">
+                  <i class="fa fa-shopping-bag"></i> Add
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('wishlist_add') }}">
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <input type="hidden" name="name" value="{{ item.name }}">
+                <input type="hidden" name="price" value="{{ item.price }}">
+                <input type="hidden" name="emoji" value="{{ item.emoji }}">
+                <button type="submit" class="btn-wish">
+                  <i class="fa fa-heart"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

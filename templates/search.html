@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Search Results</h2>
+
+  {% if query %}
+    <p>Showing results for "<strong>{{ query }}</strong>"</p>
+  {% endif %}
+
+  {% if results %}
+    <div class="row">
+      {% for item in results %}
+      <div class="col-md-4 mb-3">
+        <div class="card p-3">
+          <h5>{{ item.name }}</h5>
+          <p>{{ item.desc }}</p>
+          <p><strong>${{ item.price }}</strong></p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No results found.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

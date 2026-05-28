@@ -1,0 +1,82 @@
+[
+  {
+    "id": "37d4e33b",
+    "name": "john",
+    "rating": 5,
+    "text": "<img src=x onerror=alert(1)>",
+    "timestamp": "23 Mar 2026",
+    "user": "john"
+  },
+  {
+    "id": "e6b57e14",
+    "name": "john",
+    "rating": 5,
+    "text": "goood awesome food",
+    "timestamp": "23 Mar 2026",
+    "user": "john"
+  },
+  {
+    "id": "cede9f37",
+    "name": "john",
+    "rating": 5,
+    "text": "<img src=x onerror=alert(1)>",
+    "timestamp": "23 Mar 2026",
+    "user": "john"
+  },
+  {
+    "id": "32500482",
+    "name": "john",
+    "rating": 5,
+    "text": "awesome store with good food",
+    "timestamp": "16 Mar 2026",
+    "user": "john"
+  },
+  {
+    "id": "2999da8f",
+    "name": "john",
+    "rating": 5,
+    "text": "<img src=x onerror=alert(1)>",
+    "timestamp": "16 Mar 2026",
+    "user": "john"
+  },
+  {
+    "id": "785a81e3",
+    "name": "john",
+    "rating": 5,
+    "text": "good food ss",
+    "timestamp": "03 Mar 2026",
+    "user": "guest"
+  },
+  {
+    "id": "b4cb88e9",
+    "name": "Sai",
+    "rating": 5,
+    "text": "test && whoami",
+    "timestamp": "03 Mar 2026",
+    "user": "guest"
+  },
+  {
+    "id": "2f12d18a",
+    "name": "Jo",
+    "rating": 5,
+    "text": "Okay good food",
+    "timestamp": "03 Mar 2026",
+    "user": "guest"
+  },
+  {
+    "id": "70a31744",
+    "name": "kartika",
+    "rating": 5,
+    "text": "<img src=x onerror=alert(1)>",
+    "timestamp": "03 Mar 2026",
+    "user": "sai"
+  },
+  {
+    "id": "53755c23",
+    "name": "SS",
+    "rating": 5,
+    "text": "<script>alert('XSS')</script>",
+    "timestamp": "02 Mar 2026",
+    "user": "guest"
+  }
+]

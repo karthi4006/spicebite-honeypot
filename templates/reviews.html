@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Reviews &mdash; SpiceBite{% endblock %}
+{% block content %}
+<section class="page-hero">
+  <div class="container-xl">
+    <div class="breadcrumb-row"><a href="{{ url_for('index') }}">Home</a><span>/</span><span>Reviews</span></div>
+    <h1 class="page-title">Customer <em>Reviews</em></h1>
+    <p style="color:var(--text-muted)">Real experiences from real food lovers</p>
+  </div>
+</section>
+<section class="reviews-section">
+  <div class="container-xl">
+    <div class="reviews-layout">
+      <div class="review-form-wrap">
+        <div class="form-card">
+          <h3><i class="fa fa-pen"></i> Leave a Review</h3>
+          {% if result %}
+          <div class="alert-box alert-{{ result[0] }}">{{ result[1] }}</div>
+          {% endif %}
+          <form method="POST" action="{{ url_for('reviews') }}" enctype="multipart/form-data" id="reviewForm" novalidate>
+            <div class="field-group">
+              <label>Your Name <span class="req">*</span></label>
+              <input type="text" name="reviewer_name" class="form-ctrl" placeholder="Anonymous Foodie" required id="rName">
+            </div>
+            <div class="field-group">
+              <label>Rating <span class="req">*</span></label>
+              <div class="star-picker">
+                {% for v in [5,4,3,2,1] %}
+                <input type="radio" name="rating" id="star{{ v }}" value="{{ v }}" {% if v==5 %}checked{% endif %}>
+                <label for="star{{ v }}" title="{{ v }} star">&#x2605;</label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Review <span class="req">*</span></label>
+              <textarea name="review_text" class="form-ctrl" rows="5" id="rText"
+                placeholder="Tell us about your experience..." required minlength="10"></textarea>
+              <div class="textarea-footer">
+                <span class="field-hint" id="hText"></span>
+                <span class="char-count" id="cCount">0 / 500</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Attach Photo <span class="optional">(optional)</span></label>
+              <div class="file-drop-zone" id="dz" onclick="document.getElementById('fi').click()">
+                <i class="fa fa-cloud-upload-alt"></i>
+                <span>Drop image here or <span class="file-label">browse</span></span>
+                <small>JPG, PNG &mdash; Max 10MB</small>
+                <input type="file" name="attachment" id="fi" accept="image/*" style="display:none" onchange="showFn(this)">
+              </div>
+              <span class="file-name-display" id="fnDisplay"></span>
+            </div>
+            <button type="submit" class="btn btn-accent w-100"><i class="fa fa-paper-plane"></i> Submit Review</button>
+          </form>
+        </div>
+      </div>
+      <div class="reviews-list-wrap">
+        <div class="reviews-list-header">
+          <h3>Recent Reviews</h3>
+          <div class="reviews-stats">
+            <span class="avg-num">4.8</span>
+            <div class="avg-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+            <span class="avg-total">{{ reviews|length if reviews else 6 }}+ reviews</span>
+          </div>
+        </div>
+        <div class="reviews-list">
+          {% if reviews %}
+          {% for r in reviews %}
+          <div class="review-card">
+            <div class="review-top">
+              <div class="reviewer-avatar">{{ r.name[0].upper() if r.name else 'A' }}</div>
+              <div class="reviewer-info"><strong>{{ r.name }}</strong><div class="stars">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</div></div>
+              <span class="review-time">{{ r.timestamp }}</span>
+            </div>
+            <p class="review-text">{{ r.text }}</p>
+          </div>
+          {% endfor %}
+          {% else %}
+          {% for name,rating,text,time in [
+            ('Sarah K.',5,'The Molten Lava Cake is absolute heaven. Perfectly gooey center!','2 hours ago'),
+            ('Mike R.',4,'Ghost Pepper Wings brought tears — in the best way. Seriously hot!','1 day ago'),
+            ('Priya S.',5,'Tonkotsu Ramen rivals what I had in Tokyo. The broth is extraordinary.','2 days ago'),
+            ('James L.',5,'Best bubble tea in the city. Fast delivery, everything hot. Will re-order!','3 days ago'),
+            ('Chen W.',4,'Smash Burger is everything. The sauce is chef kiss.','4 days ago'),
+            ('Aisha M.',5,'Finally proper Laksa! The coconut broth is spot on. 10/10.','5 days ago'),
+          ] %}
+          <div class="review-card">
+            <div class="review-top">
+              <div class="reviewer-avatar">{{ name[0] }}</div>
+              <div class="reviewer-info"><strong>{{ name }}</strong><div class="stars">{{ '★' * rating }}{{ '☆' * (5-rating) }}</div></div>
+              <span class="review-time">{{ time }}</span>
+            </div>
+            <p class="review-text">{{ text }}</p>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+var rt=document.getElementById('rText'),cc=document.getElementById('cCount');
+rt.addEventListener('input',function(){var l=this.value.length;cc.textContent=l+' / 500';if(l>500)this.value=this.value.substring(0,500);});
+function showFn(i){var d=document.getElementById('fnDisplay');if(i.files.length){d.textContent='📎 '+i.files[0].name;d.style.display='block';}}
+var dz=document.getElementById('dz');
+dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave',function(){dz.classList.remove('drag-over');});
+dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag-over');var fi=document.getElementById('fi');if(e.dataTransfer.files.length){fi.files=e.dataTransfer.files;showFn(fi);}});
+document.getElementById('reviewForm').addEventListener('submit',function(e){
+  if(!document.getElementById('rName').value.trim()){e.preventDefault();return;}
+  if(!rt.value.trim()||rt.value.trim().length<10){document.getElementById('hText').textContent='Write at least 10 characters.';document.getElementById('hText').style.color='#e74c3c';e.preventDefault();}
+});
+</script>
+{% endblock %}

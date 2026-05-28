@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Staff Login — SpiceBite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#070808;--card:#0d0f0d;--accent:#e63946;--border:#1a1f1a;--text:#c8d4c8;--muted:#4a5a4a;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(230,57,70,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(230,57,70,.04) 1px,transparent 1px);background-size:40px 40px;}
+    .admin-card{background:var(--card);border:1px solid var(--border);padding:3rem 2.75rem;width:100%;max-width:420px;border-radius:16px;position:relative;z-index:10;box-shadow:0 40px 80px rgba(0,0,0,.7);}
+    .admin-logo{font-family:'Space Mono',monospace;font-size:1rem;color:var(--accent);text-align:center;margin-bottom:2rem;letter-spacing:.05em;}
+    .admin-logo .sub{display:block;font-size:.65rem;color:var(--muted);margin-top:.4rem;letter-spacing:.12em;text-transform:uppercase;}
+    h2{font-size:1.35rem;margin-bottom:.4rem;color:#dde8dd;}
+    .subtitle{color:var(--muted);font-size:.83rem;margin-bottom:1.75rem;}
+    .field{margin-bottom:1.2rem;}
+    .field label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.08em;font-family:'Space Mono',monospace;}
+    .field input{width:100%;background:#080a08;border:1px solid var(--border);color:var(--text);padding:.8rem 1rem;border-radius:10px;font-family:'Space Mono',monospace;font-size:.88rem;outline:none;transition:border .2s;}
+    .field input:focus{border-color:var(--accent);}
+    .btn-admin{width:100%;background:var(--accent);color:#fff;border:none;padding:.9rem;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem;transition:opacity .2s;margin-top:.25rem;font-family:'DM Sans',sans-serif;}
+    .btn-admin:hover{opacity:.88;}
+    .error-msg{background:#140606;border:1px solid #4a1010;color:#cf4040;padding:.8rem 1rem;border-radius:8px;font-size:.82rem;margin-bottom:1.25rem;}
+    .warn-strip{margin-top:2rem;padding:.75rem 1rem;background:#0a0c0a;border:1px solid #111;border-radius:8px;font-family:'Space Mono',monospace;font-size:.65rem;color:#2a3a2a;text-align:center;line-height:1.6;}
+    .back-link{display:block;text-align:center;margin-top:1.25rem;color:#2a3a2a;font-size:.78rem;text-decoration:none;transition:color .2s;}
+    .back-link:hover{color:var(--accent);}
+  </style>
+</head>
+<body>
+  <div class="admin-card">
+    <div class="admin-logo">
+      &#x26A1; SPICEBITE SECURE PANEL
+      <span class="sub">Restricted Access &middot; All Attempts Logged</span>
+    </div>
+    <h2>Staff Authentication</h2>
+    <p class="subtitle">Authorised personnel only. Unauthorised access is monitored.</p>
+    {% if error %}
+    <div class="error-msg">&#x26D4; {{ error }}</div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('admin_login') }}">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter username" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required>
+      </div>
+      <button type="submit" class="btn-admin">&#x1F510; Authenticate</button>
+    </form>
+    <div class="warn-strip">
+      WARNING: This system is monitored 24/7.<br>
+      Unauthorised access will be reported to law enforcement.<br>
+      Your IP address and session are being logged.
+    </div>
+    <a href="{{ url_for('index') }}" class="back-link">&larr; Return to SpiceBite</a>
+  </div>
+</body>
+</html>
