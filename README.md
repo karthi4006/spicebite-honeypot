@@ -21,7 +21,6 @@ A web based honeypot disguised as a modern restaurant platform for cybersecurity
 ```text
 honeypot/
 ├── app.py
-├── requirements.txt
 ├── templates/
 ├── static/
 ├── uploads/
@@ -45,7 +44,7 @@ honeypot/
 ## ⚙️ Installation
 
 ```bash
-pip install -r requirements.txt
+pip install flask
 python app.py
 ```
 
