@@ -34,10 +34,10 @@ honeypot/
 
 * Python
 * Flask
-* SQLite
-* HTML/CSS
+* HTML
+* CSS
 * JavaScript
-* Bootstrap
+
 
 ---
 
